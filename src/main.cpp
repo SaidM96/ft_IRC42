@@ -56,7 +56,7 @@ int main(int ac, char **av) {
             if (server._select() == EXIT_FAILURE)
                 return (EXIT_FAILURE);
             // Check if there is a new incoming connection
-            if (FD_ISSET(server.serverfd, &server.readfds)) 
+            if (FD_ISSET(server.serverfd, &server.readfds))
             {
                 int clientfd = accept(server.serverfd, (struct sockaddr *)&server.client_address, &server.lencli);
                 if (clientfd < 0) 
@@ -72,26 +72,34 @@ int main(int ac, char **av) {
             // Check if any connected server.clients have sent data
             for (iterator it = server.map_clients.begin(); it != server.map_clients.end(); ++it) 
             {
+
                 if (FD_ISSET(it->first, &server.readfds)) 
                 {
-                    int x = recv(it->first, server.buffer, BUF_SIZE, 0);
+                    memset(it->second.buffer, 0, BUF_SIZE);
+                    int x = recv(it->first, it->second.buffer, BUF_SIZE, 0);
                     if (x <= 0)
                     {
+                        std::cout << it->second.getName() <<" disconnected" << std::endl;
                         x = it->first;
                         ++it;
                         close(x);
                         server.map_clients.erase(x);
-                        std::cout << "Client disconnected" << std::endl;
                     } 
                     else 
                     {
-                        if (server.map_clients[it->first].verified == false)
-                        {
-                            connect(&server, server.buffer, it->first);
-                        }
+                        if (it->second.verified == false)
+                            connect(&server, it->second.buffer, it->first);
                         else
                         {
-                            std::cout << "hi" << std::endl;
+                            // std::cout << it->second.buffer << std::endl;
+                            // if (server.isCmd(it->second.buffer))
+                            // {
+                            //     // execute commande
+                            // }
+                            // else
+                            // {
+                                
+                            // }
                         }
                         // std::cout << server.buffer << std::endl;
                         // send(server.clients[i],":localhost CAP * LS :multi-prefix sasl", sizeof(":localhost CAP * LS :multi-prefix sasl"), 0);  
