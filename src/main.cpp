@@ -46,8 +46,10 @@ int main(int ac, char **av) {
             FD_ZERO(&server.readfds);
             // Add the socket and connected server.clients to the file descriptor set
             FD_SET(server.serverfd, &server.readfds);
-            for (iterator it = server.map_clients.begin(); it != server.map_clients.end(); ++it) 
+            for (iterator it = server.map_clients.begin(); it != server.map_clients.end(); ++it)
+            {
                 FD_SET(it->first, &server.readfds);
+            }
             // Set up timeout for select()
             server.setTime();
             // Wait for activity on any file descriptor
@@ -62,8 +64,8 @@ int main(int ac, char **av) {
                     std::cerr << "Error accepting connection" << std::endl;
                     continue;
                 }
-                // send(clientfd,"name :", 6, 0);
-                // Add new client to connected server.clients vector
+                // Add new client to connected server.clients map
+                std::cout << "accept fd: " << clientfd << std::endl;
                 server.map_clients[clientfd];
             }
 
@@ -73,11 +75,11 @@ int main(int ac, char **av) {
                 if (FD_ISSET(it->first, &server.readfds)) 
                 {
                     int x = recv(it->first, server.buffer, BUF_SIZE, 0);
-                    if (x <= 0) 
+                    if (x <= 0)
                     {
-                        close(it->first);
                         x = it->first;
                         ++it;
+                        close(x);
                         server.map_clients.erase(x);
                         std::cout << "Client disconnected" << std::endl;
                     } 
@@ -85,11 +87,11 @@ int main(int ac, char **av) {
                     {
                         if (server.map_clients[it->first].verified == false)
                         {
-                            connect(server, server.buffer, it->first);
+                            connect(&server, server.buffer, it->first);
                         }
                         else
                         {
-                            
+                            std::cout << "hi" << std::endl;
                         }
                         // std::cout << server.buffer << std::endl;
                         // send(server.clients[i],":localhost CAP * LS :multi-prefix sasl", sizeof(":localhost CAP * LS :multi-prefix sasl"), 0);  

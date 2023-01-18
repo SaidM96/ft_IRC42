@@ -51,13 +51,17 @@ std::string Client::getRealName() const
 {
     return this->_realName;
 }
+
 void Client::setPassword(std::string n)
 {
     this->_password= n;
 }
+
 std::string Client::getPassword() const
 {
     return this->_password;
 }
 
-Client::Client():verified(false), verif(0) {}
+Client::Client() : verified(false), verif(0) 
+{
+}

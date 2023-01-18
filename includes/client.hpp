@@ -27,7 +27,6 @@ class Client{
         char buffer[1024];
         bool verified;
         int verif;
-        
         // int fd;
         int id;
         Client();
@@ -43,7 +42,7 @@ class Client{
         std::string getRealName() const;
         std::string getChannel() const;
         std::string getNickName() const;
-
+        void incrementVerf(void) { ++verif;}
         bool is_verified(void)
         {
             if (verif == 3 && !verified)
@@ -53,5 +52,18 @@ class Client{
             }
             return false;
         }
-
+        Client& operator=(Client const &cp)
+        {
+            _nickname = cp.getNickName();
+            _name = cp.getName();
+            _password = cp.getPassword();
+            verified = cp.verified;
+            verif = cp.verif;
+            return (*this);
+        }
+        Client(Client const &cp)
+        {
+            *this = cp;   
+        }
+        
 };

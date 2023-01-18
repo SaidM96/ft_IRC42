@@ -75,12 +75,12 @@ int Server::getPort(){
     return (this->_port);
 }
 
-int Server::_accept(){
-    int newfd = accept(this->serverfd, NULL, NULL);
-    if (newfd < 0){
-        std::cerr << "error in accept" << std::endl;
-        return (EXIT_FAILURE);
-    }
+// int Server::_accept(){
+//     int newfd = accept(this->serverfd, NULL, NULL);
+//     if (newfd < 0){
+//         std::cerr << "error in accept" << std::endl;
+//         return (EXIT_FAILURE);
+//     }
     // send(newfd, "Please enter first name", 23, 0);
     // while(true){
     //     int bytes_received = recv(newfd, this->buffer, BUF_SIZE, 0);
@@ -91,57 +91,50 @@ int Server::_accept(){
     //         std::cout << cmd.size() << std::endl;
     //     }
     // }
-    this->map_clients[newfd];
-    std::cout << "new client connected" << std::endl;
-    return (EXIT_SUCCESS);
-}
+//     this->map_clients[newfd];
+//     std::cout << "new client connected" << std::endl;
+//     return (EXIT_SUCCESS);
+// }
 
-void nick(Server server,std::vector<std::string> cmd, int fd){
+void nick(Server *server,std::vector<std::string> cmd, int fd){
     if (cmd[0] == "NICK")
         if (cmd.size() == 2){
-            std::cout << fd << " :" <<"NICK OK" << std::endl;
-            server.map_clients[fd].setNickName(cmd[1]);
-            for(size_t i = 0; i < cmd.size(); i++){
-                std::cout << cmd[i];
-            }
-            std::cout << fd << " : " << cmd[1] << std::endl;
-            server.map_clients[fd].verif++;
-            // server.infoClients->fd = fd;
-           std::cout << server.map_clients[fd].verif << " :" <<  "PASS OK" << std::endl;
+            server->map_clients[fd].setNickName(cmd[1]);
+            server->map_clients[fd].incrementVerf();
+           std::cout <<"fd: " << fd << "  verif : "<< server->map_clients[fd].verif << " :" <<  "PASS OK" << std::endl;
         }
 }
-void user(Server server, std::vector<std::string> cmd, int fd){
+
+void user(Server *server, std::vector<std::string> cmd, int fd){
     if (cmd[0] == "USER"){
-        std::cout << fd << " :" << "USER OK" << std::endl;
-        std::cout << fd << " : " << cmd[1] << std::endl;
-        server.map_clients[fd].setName(cmd[1]);
-        server.map_clients[fd].setRealName(cmd[4]);
-        // server.map_clients[fd].fd = fd;
-        server.map_clients[fd].verif++;
-        server.map_clients[fd].id = atoi(cmd[2].c_str());
-        std::cout << server.map_clients[fd].verif << " :" <<  "PASS OK" << std::endl;
+        server->map_clients[fd].setName(cmd[1]);
+        // server->map_clients[fd].setRealName(cmd[4]);
+        // server->map_clients[fd].fd = fd;
+        server->map_clients[fd].incrementVerf();
+        // server->map_clients[fd].id = atoi(cmd[2].c_str());
+        std::cout <<"fd: " << fd << "  verif : "<< server->map_clients[fd].verif << " :" <<  "PASS OK" << std::endl;
     }
 }
-void passwd(Server server, std::vector<std::string> cmd,  int fd){
+
+void passwd(Server *server, std::vector<std::string> cmd,  int fd)
+{    
     if (cmd[0] == "PASS")
-        if (cmd.size() == 2){ 
-            server.map_clients[fd].setPassword(cmd[1]);
-            //check if password
-            // if (server.infoClients->getPassword() == server.) 
-            server.map_clients[fd].verif++;
-            std::cout << server.map_clients[fd].verif << " :" <<  "PASS OK" << std::endl;
-            // return (EXIT_SUCCESS);
+    {
+        //check if password
+        if (cmd.size() == 2)
+        { 
+                server->map_clients[fd].setPassword(cmd[1]);
+                server->map_clients[fd].incrementVerf();
+                std::cout <<"fd: " << fd << "  verif : "<< server->map_clients[fd].verif << " :" <<  "PASS OK" << std::endl;
         }
-    // return (EXIT_FAILURE);
-    
+    }
 }
-void connect (Server server,char *buffer, int fd)
+void connect (Server *server,char *buffer, int fd)
 {
-    std::vector<std::string> cmd = server.splitCMD(buffer);
+    std::vector<std::string> cmd = server->splitCMD(buffer);
     nick(server,cmd, fd);
     user(server, cmd, fd);
     passwd(server, cmd, fd);
-    // std::cout << server.map_clients[fd].verif <<std::endl;
-    if (server.map_clients[fd].is_verified())
+    if (server->map_clients[fd].is_verified())
         std::cout << "new client is verified" << std::endl;
 }
