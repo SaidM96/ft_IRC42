@@ -65,7 +65,7 @@ void connect(Server *server, char *buffer, int fd);
 void nick(Server *server, std::vector<std::string> cmd, int fd);
 void user(Server *server, std::vector<std::string> cmd, int fd);
 void passwd(Server *server, std::vector<std::string> cmd, int fd);
-bool isCmd(char *s)
-{
-    
-}
+// bool isCmd(char *s)
+// {
+
+// }

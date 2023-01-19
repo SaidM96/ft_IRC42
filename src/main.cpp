@@ -40,7 +40,6 @@ int main(int ac, char **av) {
         // Start listening for incoming connections
         if (server._bind() == EXIT_FAILURE || server._listen() == EXIT_FAILURE)
             return (EXIT_FAILURE);
-        memset(server.buffer, 0, BUF_SIZE);
         while (true) {
             // Clear the file descriptor set
             FD_ZERO(&server.readfds);
@@ -91,6 +90,10 @@ int main(int ac, char **av) {
                             connect(&server, it->second.buffer, it->first);
                         else
                         {
+                            // for (iterator it1; it1 != server.map_clients.end(); it1++) {
+                            //     if (it1 != it) {
+                            //         send(it1->first, it1->second.buffer, bytes_received, 0);
+                            //     }
                             // std::cout << it->second.buffer << std::endl;
                             // if (server.isCmd(it->second.buffer))
                             // {
@@ -101,19 +104,15 @@ int main(int ac, char **av) {
                                 
                             // }
                         }
-                        // std::cout << server.buffer << std::endl;
-                        // send(server.clients[i],":localhost CAP * LS :multi-prefix sasl", sizeof(":localhost CAP * LS :multi-prefix sasl"), 0);  
-                        // std::cout << "--" << server.buffer<< "--" << std::endl;
-                        
-                        // if (strcmp(server.buffer,syn_ack) == 0)
-                        //     send(server.clients[i], syn_ack, sizeof(syn_ack), 0);
+                        // std::cout << it->second.buffer << std::endl;
+                        // send(it->first,":localhost CAP * LS :multi-prefix sasl", sizeof(":localhost CAP * LS :multi-prefix sasl"), 0);  
+                        // std::cout << "--" << it->second.buffer<< "--" << std::endl;
+                        // if (strcmp(it->second.buffer,syn_ack) == 0)
+                        //     send (it->first, syn_ack, sizeof(syn_ack), 0);
 
                         // Add code here to handle the received message and send it to other server.clients as necessary
-                        // for (int j = 0; j < server.clients.size(); j++) {
-                        //     if (j != i) {
-                        //         send(server.clients[j], buf, bytes_received, 0);
-                        //     }
-                        // }
+
+                        }
                     }
                 }
             }

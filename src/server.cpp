@@ -83,27 +83,6 @@ int Server::getPort(){
     return (this->_port);
 }
 
-// int Server::_accept(){
-//     int newfd = accept(this->serverfd, NULL, NULL);
-//     if (newfd < 0){
-//         std::cerr << "error in accept" << std::endl;
-//         return (EXIT_FAILURE);
-//     }
-    // send(newfd, "Please enter first name", 23, 0);
-    // while(true){
-    //     int bytes_received = recv(newfd, this->buffer, BUF_SIZE, 0);
-    //     if (bytes_received > 0){
-    //         std::vector<std::string> cmd = this->splitCMD(this->buffer);
-    //         memset((void *)this->buffer, 0, BUF_SIZE);
-    //         std::cout << "`" << cmd[2] << "`" << std::endl;
-    //         std::cout << cmd.size() << std::endl;
-    //     }
-    // }
-//     this->map_clients[newfd];
-//     std::cout << "new client connected" << std::endl;
-//     return (EXIT_SUCCESS);
-// }
-
 void nick(Server *server,std::vector<std::string> cmd, int fd){
     if (cmd[0] == "NICK")
         if (cmd.size() == 2){
@@ -143,5 +122,5 @@ void connect (Server *server,char *buffer, int fd)
     user(server, cmd, fd);
     passwd(server, cmd, fd);
     if (server->map_clients[fd].is_verified())
-        std::cout << server->map_clients[fd].getName() << "  is connected! " << std::endl;
+        std::cout << server->map_clients[fd].getName() << "  is connected!" << std::endl;
 }
