@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smia <smia@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: mhaddaou <mhaddaou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 12:54:55 by mhaddaou          #+#    #+#             */
-/*   Updated: 2023/01/17 18:43:59 by smia             ###   ########.fr       */
+/*   Updated: 2023/02/02 19:09:06 by mhaddaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,18 +16,15 @@
 
 #include <typeinfo>
 #include <arpa/inet.h>
+#include <fstream>                        
 
 
 // const int BUF_SIZE = 1024;
 
 int main(int ac, char **av) {
-    
     if (ac < 3)
         std::cerr << "invalid arguments" << std::endl;
     else{
-        
-        // char syn_ack[] = "SYN-ACK";
-        
         Server server(av[1], av[2]);
         // Create socket
         server._socket();
@@ -43,11 +40,14 @@ int main(int ac, char **av) {
         while (true) {
             // Clear the file descriptor set
             FD_ZERO(&server.readfds);
+            FD_ZERO(&server.writefds);
             // Add the socket and connected server.clients to the file descriptor set
             FD_SET(server.serverfd, &server.readfds);
-            for (iterator it = server.map_clients.begin(); it != server.map_clients.end(); ++it)
+            FD_SET(server.serverfd, &server.writefds);
+            for (size_t i = 0; i < server.fds.size(); ++i)
             {
-                FD_SET(it->first, &server.readfds);
+                FD_SET(server.fds[i], &server.readfds);
+                FD_SET(server.serverfd, &server.writefds);
             }
             // Set up timeout for select()
             server.setTime();
@@ -64,54 +64,35 @@ int main(int ac, char **av) {
                     continue;
                 }
                 // Add new client to connected server.clients map
-                std::cout << "accept fd: " << clientfd << std::endl;
+                
+                server.fds.push_back(clientfd);
                 server.map_clients[clientfd];
+                // server.map_clients[clientfd].fd = clientfd;
+                server.map_clients[clientfd]._ip = server.client_address.sin_addr.s_addr;
             }
 
             // Check if any connected server.clients have sent data
-            for (iterator it = server.map_clients.begin(); it != server.map_clients.end(); ++it) 
-            {
-
-                if (FD_ISSET(it->first, &server.readfds)) 
+            for (size_t i = 0; i < server.fds.size(); ++i ) 
+            {   
+                if (FD_ISSET(server.fds[i], &server.readfds))
                 {
-                    memset(it->second.buffer, 0, BUF_SIZE);
-                    int x = recv(it->first, it->second.buffer, BUF_SIZE, 0);
-                    if (x <= 0)
+                    memset(server.map_clients[server.fds[i]].buffer, 0, BUF_SIZE);
+                    int recev_bytes = recv(server.fds[i], server.map_clients[server.fds[i]].buffer, BUF_SIZE, 0);
+                    if (recev_bytes && server.checkQuit(server.map_clients[server.fds[i]].buffer) == EXIT_SUCCESS)
+                        recev_bytes = 0;
+                    if (server.map_clients[server.fds[i]]._ban == true)
+                        recev_bytes = 0;
+                    if (recev_bytes == 0)
+                        desconectedClient(&server, server.fds[i], i);
+                    else if (recev_bytes < 0)
+                        std::cout << "error to read " << std::endl;
+                    else
                     {
-                        std::cout << it->second.getName() <<" disconnected" << std::endl;
-                        x = it->first;
-                        ++it;
-                        close(x);
-                        server.map_clients.erase(x);
-                    } 
-                    else 
-                    {
-                        if (it->second.verified == false)
-                            connect(&server, it->second.buffer, it->first);
-                        else
-                        {
-                            // for (iterator it1; it1 != server.map_clients.end(); it1++) {
-                            //     if (it1 != it) {
-                            //         send(it1->first, it1->second.buffer, bytes_received, 0);
-                            //     }
-                            // std::cout << it->second.buffer << std::endl;
-                            // if (server.isCmd(it->second.buffer))
-                            // {
-                            //     // execute commande
-                            // }
-                            // else
-                            // {
-                                
-                            // }
-                        }
-                        // std::cout << it->second.buffer << std::endl;
-                        // send(it->first,":localhost CAP * LS :multi-prefix sasl", sizeof(":localhost CAP * LS :multi-prefix sasl"), 0);  
-                        // std::cout << "--" << it->second.buffer<< "--" << std::endl;
-                        // if (strcmp(it->second.buffer,syn_ack) == 0)
-                        //     send (it->first, syn_ack, sizeof(syn_ack), 0);
-
-                        // Add code here to handle the received message and send it to other server.clients as necessary
-
+                        if (server.map_clients[server.fds[i]].is_verified == false)
+                            connect(&server, server.map_clients[server.fds[i]].buffer, server.fds[i], i);
+                        else{
+                            handleCmd(&server, server.map_clients[server.fds[i]].buffer, server.fds[i]);
+                            
                         }
                     }
                 }
@@ -120,3 +101,4 @@ int main(int ac, char **av) {
     }
     return 0;
 }
+

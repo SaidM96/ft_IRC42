@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smia <smia@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: mhaddaou <mhaddaou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/15 16:17:29 by mhaddaou          #+#    #+#             */
-/*   Updated: 2023/01/17 18:47:16 by smia             ###   ########.fr       */
+/*   Updated: 2023/02/01 23:43:47 by mhaddaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ std::string Client::getRealName() const
 
 void Client::setPassword(std::string n)
 {
+    n.erase(std::remove(n.begin(), n.end(), '\n'), n.end());
     this->_password= n;
 }
 
@@ -62,6 +63,4 @@ std::string Client::getPassword() const
     return this->_password;
 }
 
-Client::Client() : verified(false), verif(0) 
-{
-}
+Client::Client() : verif(0), is_verified(false) , isClient(false), _ban(false){}
